@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -12,6 +14,22 @@ func main() {
 	fmt.Println("==================")
 	
 	steamPath := "C:\\Program Files (x86)\\Steam\\steam.exe"
+	
+	// Load custom path if exists
+	defaultSboxPath := "C:\\Program Files (x86)\\Steam\\steamapps\\common\\sbox"
+	settingsFilePath := "optimizer_settings.txt"
+	
+	sboxPath := defaultSboxPath
+	if data, err := os.ReadFile(settingsFilePath); err == nil {
+		customPath := strings.TrimSpace(string(data))
+		if customPath != "" {
+			sboxPath = customPath
+			fmt.Println("✅ Using custom s&box path:", sboxPath)
+		}
+	}
+	
+	// Build full cfg path
+	cfgPath := filepath.Join(sboxPath, "core", "cfg")
 	
 	// Check if Steam exists
 	if _, err := os.Stat(steamPath); os.IsNotExist(err) {
@@ -24,6 +42,7 @@ func main() {
 	
 	fmt.Println("✅ Steam found")
 	fmt.Println("📝 Launching s&box with settings from graphics_config.vcfg...")
+	fmt.Println("📂 Config path:", cfgPath)
 	
 	// Launch s&box through Steam with config exec
 	cmd := exec.Command(steamPath, "-applaunch", "590830", "+exec", "graphics_config.vcfg")
