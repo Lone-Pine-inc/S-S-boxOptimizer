@@ -470,6 +470,154 @@ func main() {
 			myWindow)
 	})
 
+
+	resetToDefaultsButton := widget.NewButton("🔧 Reset to Defaults", func() {
+		dialog.ShowConfirm("Reset to Defaults", 
+			"This will create a config file that resets all settings to their default values.\n\nAre you sure?",
+			func(confirmed bool) {
+				if confirmed {
+					logText.SetText("")
+					addLog("Resetting all settings to defaults...")
+
+					// Uncheck all checkboxes in UI
+					for _, checkbox := range checkboxes {
+						checkbox.SetChecked(false)
+					}
+					fpsMaxEnabled.SetChecked(false)
+					texturePoolEnabled.SetChecked(false)
+					textureLODEnabled.SetChecked(false)
+
+					// Create reset commands for all convars used in the app
+					var resetCommands []string
+					
+					// Add show_version_overlay back to default
+					resetCommands = append(resetCommands, "show_version_overlay 1")
+					
+					// Post-processing
+					resetCommands = append(resetCommands, "r_postprocess 1")
+					resetCommands = append(resetCommands, "r_bloom 1")
+					resetCommands = append(resetCommands, "r_motionblur_scale 1")
+					resetCommands = append(resetCommands, "r_dof_quality 3")
+					resetCommands = append(resetCommands, "r_enable_autoexposure 1")
+					
+					// Shadows
+					resetCommands = append(resetCommands, "r_shadows 1")
+					resetCommands = append(resetCommands, "lb_time_sliced_shadows 1")
+					resetCommands = append(resetCommands, "lb_indexed_pointlight_shadows 0")
+					
+					// Ambient Occlusion
+					resetCommands = append(resetCommands, "r_ao_quality 3")
+					
+					// Lighting
+					resetCommands = append(resetCommands, "r_enable_high_precision_lighting 1")
+					
+					// Reflections
+					resetCommands = append(resetCommands, "r_ssr_downsample_ratio 2")
+					
+					// Fog
+					resetCommands = append(resetCommands, "r_enable_gradient_fog 1")
+					resetCommands = append(resetCommands, "r_enable_volume_fog 1")
+					resetCommands = append(resetCommands, "r_enable_cubemap_fog 1")
+					resetCommands = append(resetCommands, "volume_fog_disable 0")
+					
+					// Decals
+					resetCommands = append(resetCommands, "r_render_decals 1")
+					resetCommands = append(resetCommands, "r_gpu_decals 1")
+					
+					// 3D Skybox
+					resetCommands = append(resetCommands, "r_3d_skybox 1")
+					resetCommands = append(resetCommands, "r_3d_skybox_depth_prepass 1")
+					
+					// Textures
+					resetCommands = append(resetCommands, "r_texture_stream_mip_bias 0")
+					resetCommands = append(resetCommands, "r_texture_stream_max_resolution -1")
+					resetCommands = append(resetCommands, "r_texture_stream_resolution_bias_min 1.0")
+					resetCommands = append(resetCommands, "r_texture_lod_scale 1.0")
+					resetCommands = append(resetCommands, "r_texture_pool_size 1600")
+					resetCommands = append(resetCommands, "r_fallback_texture_lod_scale 2.0")
+					
+					// Culling & LOD
+					resetCommands = append(resetCommands, "r_size_cull_threshold 0.25")
+					resetCommands = append(resetCommands, "r_depth_prepass_cull_threshold 60.0")
+					resetCommands = append(resetCommands, "r_worldlod 1")
+					resetCommands = append(resetCommands, "sc_bounds_group_cull 1")
+					
+					// Morphing & Animation
+					resetCommands = append(resetCommands, "r_morphing_enabled 1")
+					resetCommands = append(resetCommands, "r_allow_morph_batching_on_base 0")
+					resetCommands = append(resetCommands, "sc_new_morph_atlasing 1")
+					
+					// Skinning
+					resetCommands = append(resetCommands, "r_skinning_enabled 1")
+					
+					// Refraction & Transparency
+					resetCommands = append(resetCommands, "r_render_refraction 1")
+					resetCommands = append(resetCommands, "r_render_translucent 1")
+					resetCommands = append(resetCommands, "r_translucent 1")
+					
+					// Overlays
+					resetCommands = append(resetCommands, "r_draw_overlays 1")
+					
+					// VSync & Synchronization
+					resetCommands = append(resetCommands, "r_frame_sync_enable 1")
+					resetCommands = append(resetCommands, "r_wait_on_present 0")
+					
+					// FPS
+					resetCommands = append(resetCommands, "fps_max 200")
+					
+					// Scene System
+					resetCommands = append(resetCommands, "sc_disable_shadow_fastpath 0")
+					resetCommands = append(resetCommands, "sc_mesh_backface_culling 1")
+					resetCommands = append(resetCommands, "sc_draw_aggregate_meshes 1")
+					
+					// Additional Optimizations
+					resetCommands = append(resetCommands, "r_render_dynamic_objects 1")
+					resetCommands = append(resetCommands, "debug_draw_enable 1")
+					resetCommands = append(resetCommands, "mat_disable_normal_mapping 0")
+					resetCommands = append(resetCommands, "vis_sunlight_enable 1")
+					
+					// Vulkan Memory
+					resetCommands = append(resetCommands, "r_vma_defrag_enabled 1")
+					resetCommands = append(resetCommands, "vulkan_batch_submits 1")
+					
+					// Volume Fog Details
+					resetCommands = append(resetCommands, "volume_fog_depth 64")
+					resetCommands = append(resetCommands, "volume_fog_height 160")
+					resetCommands = append(resetCommands, "volume_fog_width 240")
+					
+					// IK & Animation
+					resetCommands = append(resetCommands, "ik_enable 1")
+					resetCommands = append(resetCommands, "animgraph_footlock_enabled 1")
+
+					cfgPath = filepath.Join(sboxPath, "core", "cfg")
+					configFilePath = filepath.Join(cfgPath, "graphics_config.vcfg")
+					
+					// Create directories if they don't exist
+					os.MkdirAll(cfgPath, 0755)
+					
+					configContent := "// s&box Graphics Config - RESET TO DEFAULTS\n"
+					configContent += "// Generated by s&box Optimizer\n"
+					configContent += "// This file resets all optimizations to default values\n\n"
+					configContent += strings.Join(resetCommands, "\n") + "\n"
+
+					err := os.WriteFile(configFilePath, []byte(configContent), 0644)
+					if err != nil {
+						addLog(fmt.Sprintf("❌ Error creating reset config: %v", err))
+						dialog.ShowError(fmt.Errorf("Error: %v", err), myWindow)
+						return
+					}
+
+					addLog(fmt.Sprintf("✅ Reset config saved: %s", configFilePath))
+					addLog(fmt.Sprintf("📝 Commands applied: %d", len(resetCommands)))
+					addLog("✅ Done! Use launcher.exe to start the game with default settings")
+					
+					dialog.ShowInformation("Success", 
+						fmt.Sprintf("Settings reset to defaults!\n\nCommands applied: %d\n\nRestart s&box to apply changes", len(resetCommands)), 
+						myWindow)
+				}
+			}, myWindow)
+	})
+
 	// Reload settings button
 	reloadButton := widget.NewButton("🔄 Reload from File", func() {
 		logText.SetText("")
@@ -533,7 +681,7 @@ func main() {
 	scrollableCheckboxes := container.NewScroll(checkboxContainer)
 	scrollableCheckboxes.SetMinSize(fyne.NewSize(520, 350))
 
-	buttonRow1 := container.NewHBox(selectAllButton, deselectAllButton, reloadButton)
+	buttonRow1 := container.NewHBox(selectAllButton, deselectAllButton, resetToDefaultsButton, reloadButton)
 	buttonRow2 := container.NewHBox(mediumPresetButton, lowPresetButton)
 
 	scrollableLog := container.NewScroll(logText)
