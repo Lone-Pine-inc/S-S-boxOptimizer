@@ -7,9 +7,14 @@ LonePine discord Server: https://discord.gg/fg4KaeGbjm
 ## 🎮 Usage
 
 open sbox_optimizer.exe -> 
+
 set optinos -> 
+
 click SaveSettings button -> 
+
 run launcher.exe ->
+( or just add in steam for s&box launch options +exec file_name.vcfg if you think this kinda sus )
+
 enjoy optimized s&box!
 
 ---
