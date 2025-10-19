@@ -13,7 +13,7 @@ set optinos ->
 click SaveSettings button -> 
 
 run launcher.exe ->
-( or just add in steam for s&box launch options +exec file_name.vcfg if you think this kinda sus )
+( or just add in steam for s&box launch options +exec graphics_config.vcfg if you think this kinda sus )
 
 enjoy optimized s&box!
 
