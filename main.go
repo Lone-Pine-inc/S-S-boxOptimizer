@@ -100,8 +100,7 @@ func main() {
 
 	// Create checkboxes for settings
 	checkboxes := map[string]*widget.Check{
-		"show_version_overlay 0":    widget.NewCheck("Disable version overlay in corner", nil),
-
+		
 		// === Post-processing ===
 		"r_postprocess 0":           widget.NewCheck("Disable post-processing", nil),
 		"r_bloom 0":                 widget.NewCheck("Disable bloom (glow)", nil),
@@ -244,7 +243,6 @@ func main() {
 	}
 
 	lowPreset := map[string]bool{
-		"show_version_overlay 0": true,
 		"r_postprocess 0": true,
 		"r_bloom 0": true,
 		"r_motionblur_scale 0": true,
@@ -420,7 +418,9 @@ func main() {
 		addLog("Saving settings...")
 
 		var commands []string
-		
+
+		commands = append(commands, "show_version_overlay 0")
+
 		for cmd, checkbox := range checkboxes {
 			if checkbox.Checked {
 				commands = append(commands, cmd)
