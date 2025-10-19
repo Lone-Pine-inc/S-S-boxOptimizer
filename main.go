@@ -38,11 +38,9 @@ func main() {
 	configFilePath := filepath.Join(cfgPath, "graphics_config.vcfg")
 
 	// Path display with selectable text
-	pathEntry := widget.NewEntry()
-	pathEntry.SetText(sboxPath)
-	pathEntry.Disable() // Disable editing but allow selection
-	
 	pathLabel := widget.NewLabel("s&box Installation Path:")
+	pathValueLabel := widget.NewLabel(sboxPath)
+	pathValueLabel.Wrapping = fyne.TextWrapWord
 	
 	changePathButton := widget.NewButton("📂 Change s&box Path", func() {
 		entry := widget.NewEntry()
@@ -67,7 +65,7 @@ func main() {
 					sboxPath = newPath
 					cfgPath = filepath.Join(sboxPath, "core", "cfg")
 					configFilePath = filepath.Join(cfgPath, "graphics_config.vcfg")
-					pathEntry.SetText(sboxPath)
+					pathValueLabel.SetText(sboxPath)
 					
 					// Save to settings file
 					os.WriteFile(settingsFilePath, []byte(newPath), 0644)
@@ -83,7 +81,7 @@ func main() {
 		sboxPath = defaultSboxPath
 		cfgPath = filepath.Join(sboxPath, "core", "cfg")
 		configFilePath = filepath.Join(cfgPath, "graphics_config.vcfg")
-		pathEntry.SetText(sboxPath)
+		pathValueLabel.SetText(sboxPath)
 		
 		// Remove custom settings file
 		os.Remove(settingsFilePath)
@@ -94,7 +92,7 @@ func main() {
 	pathContainer := container.NewVBox(
 		widget.NewLabel("=== s&box Installation Path ==="),
 		pathLabel,
-		pathEntry,
+		pathValueLabel,
 		container.NewHBox(changePathButton, resetPathButton),
 		widget.NewLabel(fmt.Sprintf("Config will be saved to: ...\\core\\cfg")),
 		widget.NewSeparator(),
@@ -143,7 +141,6 @@ func main() {
 		"r_texture_stream_mip_bias 1":        widget.NewCheck("Mip bias +1 (less detail)", nil),
 		"r_texture_stream_max_resolution 1024": widget.NewCheck("Max texture resolution 1024", nil),
 		"r_texture_stream_resolution_bias_min 0.5": widget.NewCheck("Lower min resolution bias", nil),
-		"r_fallback_texture_lod_scale 4.0":   widget.NewCheck("Aggressive LOD for fallback textures", nil),
 		
 		// === Culling & LOD ===
 		"r_size_cull_threshold 0.5":         widget.NewCheck("Increase object culling threshold", nil),
@@ -156,6 +153,9 @@ func main() {
 		"r_allow_morph_batching_on_base 0": widget.NewCheck("Disable morph batching", nil),
 		"sc_new_morph_atlasing 0":   widget.NewCheck("Disable new morph atlasing", nil),
 		
+		// === Skinning (CAUTION!) ===
+		"r_skinning_enabled 0":      widget.NewCheck("⚠️ Disable skinning (may break characters!)", nil),
+		
 		// === Refraction & Transparency ===
 		"r_render_refraction 0":     widget.NewCheck("Disable refraction", nil),
 		"r_render_translucent 0":    widget.NewCheck("Disable translucent objects", nil),
@@ -165,7 +165,6 @@ func main() {
 		"r_draw_overlays 0":         widget.NewCheck("Disable overlays", nil),
 		
 		// === VSync & Synchronization ===
-		"r_frame_sync_enable 0":     widget.NewCheck("Disable frame sync", nil),
 		"r_wait_on_present 0":       widget.NewCheck("Don't wait on present", nil),
 		
 		// === Scene System Optimizations ===
@@ -174,7 +173,10 @@ func main() {
 		"sc_draw_aggregate_meshes 0":        widget.NewCheck("Disable aggregate meshes", nil),
 		
 		// === Additional Optimizations ===
+		"r_render_dynamic_objects 0":        widget.NewCheck("⚠️ The main menu is empty, but it has infinite FPS", nil),
 		"debug_draw_enable 0":               widget.NewCheck("Disable debug draw", nil),
+		"mat_disable_normal_mapping 1":      widget.NewCheck("⚠️ Disable normal mapping", nil),
+		"vis_sunlight_enable 0":             widget.NewCheck("Disable sunlight visibility", nil),
 		
 		// === Vulkan Memory (Advanced) ===
 		"r_vma_defrag_enabled 0":            widget.NewCheck("Disable VMA defragmentation", nil),
@@ -186,6 +188,7 @@ func main() {
 		"volume_fog_width 30":               widget.NewCheck("Lower volume fog width to 30", nil),
 		
 		// === IK & Animation ===
+		"ik_enable 0":                       widget.NewCheck("⚠️ Disable IK (inverse kinematics)", nil),
 		"animgraph_footlock_enabled 0":      widget.NewCheck("Disable footlock", nil),
 	}
 
@@ -234,14 +237,9 @@ func main() {
 		"r_postprocess 0": true,
 		"r_bloom 0": true,
 		"r_motionblur_scale 0": true,
-		"r_dof_quality 0": true,
 		"r_ao_quality 0": true,
 		"r_ssr_downsample_ratio 3": true,
-		"r_enable_volume_fog 0": true,
-		"volume_fog_disable 1": true,
-		"r_render_decals 0": true,
 		"r_3d_skybox_depth_prepass 0": true,
-		"r_frame_sync_enable 0": true,
 		"debug_draw_enable 0": true,
 	}
 
@@ -279,7 +277,6 @@ func main() {
 		"sc_new_morph_atlasing 0": true,
 		"r_render_refraction 0": true,
 		"r_draw_overlays 0": true,
-		"r_frame_sync_enable 0": true,
 		"r_wait_on_present 0": true,
 		"sc_disable_shadow_fastpath 1": true,
 		"sc_mesh_backface_culling 1": true,
@@ -291,6 +288,10 @@ func main() {
 		"volume_fog_height 20": true,
 		"volume_fog_width 30": true,
 		"animgraph_footlock_enabled 0": true,
+		"mat_disable_normal_mapping 1": true,
+		"vis_sunlight_enable 0": true,
+		"r_translucent 0": true,
+		"r_render_translucent 0": true,
 	}
 
 	// Log widget (selectable text)
@@ -486,11 +487,11 @@ func main() {
 
 	// Preset buttons
 	mediumPresetButton := widget.NewButton("📊 Medium Preset", func() {
-		applyPreset(mediumPreset, "Medium", "144", 1400, 2.0)
+		applyPreset(mediumPreset, "Medium", "240", 1400, 2.0)
 	})
 
 	lowPresetButton := widget.NewButton("⚡ Low Preset (Max FPS)", func() {
-		applyPreset(lowPreset, "Low", "240", 1200, 2.5)
+		applyPreset(lowPreset, "Low", "240", 1200, 4.0)
 	})
 
 	// Select all button
