@@ -157,7 +157,7 @@ func main() {
 		
 		// === Refraction & Transparency ===
 		"r_render_refraction 0":     widget.NewCheck("Disable refraction", nil),
-		"r_render_translucent 0":    widget.NewCheck("Disable translucent objects", nil),
+		"r_render_translucent 0":    widget.NewCheck("⚠️ Disable translucent objects (braking world panels)", nil),
 		"r_translucent 0":           widget.NewCheck("Disable translucent geometry", nil),
 		
 		// === Overlays ===
@@ -289,7 +289,6 @@ func main() {
 		"mat_disable_normal_mapping 1": true,
 		"vis_sunlight_enable 0": true,
 		"r_translucent 0": true,
-		"r_render_translucent 0": true,
 	}
 
 	// Log widget (selectable text)
