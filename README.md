@@ -188,12 +188,12 @@ do with this whatever you want. who cares about MIT actually lol
 
 ---
 
-**Made with ❤️ for the s&box community**
-
----
-
 ### 💬 Connect with us. Comment and chat!
 
 [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@LonePine-c9n) [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/h7d6Ejj4sH)
 
 **LonePine** develops game modes and content for s&box. Our server is open to the whole s&box community.
+
+---
+
+**Made with ❤️ for the s&box community**
